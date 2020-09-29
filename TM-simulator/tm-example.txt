@@ -15,5 +15,3 @@ abxy
 4
 aabb
 aaabbb
-abab
-bbaa

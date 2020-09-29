@@ -38,21 +38,21 @@ ts_matrix = file_list[start_transitions:(nr_transitions + start_transitions)]
 print(ts_matrix)
 
 # Create list of words for the simulation
-words_str = file_list[start_words:(nr_words + start_words)]
-words = [list(word) for word in words_str]  # Convert strings to arrays of characters
+words = file_list[start_words:(nr_words + start_words)]
+words = [list(word) for word in words]  # Convert strings to arrays of characters
 [word.insert(0, '-') for word in words]  # Insert '-' at the start
 [word.insert(len(word), '-') for word in words]  # Insert '-' at the end
 print(words)
 
 
-# SIMULATOR
+# SIMULATOR FUNCTIONS
 
-def write(index, new, tp):
+def write(index, new, tp):  # Function that writes on the tape
     tp[index] = new
     return tp
 
 
-def move_head(direction, pos):
+def move_head(direction, pos):  # Function that moves the head
     if direction == 'D':
         pos += 1
     else:
@@ -60,41 +60,59 @@ def move_head(direction, pos):
     return pos
 
 
-def update_status(new, curr):
+def update_status(new, curr):  # Function that updates the status
     curr = new
     return curr
 
 
-tape = words[0]
+def array_to_string(arr):  # Convert array to string
+    temp = ""
+    for char in arr:
+        temp += char
+    return temp
 
-# While not in the accepting state
-while q != qa:
 
-    # Create substring of current state (q) + current symbol (head position on tape)
-    input_state_symbol = str(q) + str(tape[head_position])
-    print(input_state_symbol)
+# EXECUTION
+# Loop the simulation through all the words
 
-    # Match the input substring to the list of available instructions, if none is found, reject
-    ts_match = [ts.find(input_state_symbol, 0, 2) for ts in ts_matrix]
 
-    try:
-        ts_index = ts_match.index(0)
-    except ValueError:
-        f"1: {(words_str[0])} not OK"
-        continue
+for word in words:
 
-    # Save transition found
-    transition = ts_matrix[ts_index]
-    print(transition)
+    tape = word[:]  # Copy word onto tape (Prevents passing it by reference)
 
-    # Write on tape
-    tape = write(head_position, transition[2], tape)
+    # While not in the accepting state
+    while q != qa:
 
-    # Move head
-    head_position = move_head(transition[3], head_position)
+        # Create substring of current state (q) + current symbol (head position on tape)
+        input_state_symbol = str(q) + str(tape[head_position])
+        print(input_state_symbol)
 
-    # Update status
-    q = update_status(transition[4], q)
+        # Match the input substring to the list of available instructions, if none is found, reject
+        ts_match = [ts.find(input_state_symbol, 0, 2) for ts in ts_matrix]
 
-print(f"1: {(words_str[0])} OK")
+        try:
+            ts_index = ts_match.index(0)
+        except ValueError:
+            f"1: {(array_to_string(word))} not OK"
+            continue
 
+        # Save transition found
+        transition = ts_matrix[ts_index]
+        print(transition)
+
+        # Write on tape
+        tape = write(head_position, transition[2], tape)
+
+        # Move head
+        head_position = move_head(transition[3], head_position)
+
+        # Update status
+        q = update_status(transition[4], q)
+
+    print(f"1: {(array_to_string(word))} OK")
+
+    # Reset variables
+    q = 1
+    head_position = 1
+
+print(words)
